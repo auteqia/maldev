@@ -1,3 +1,4 @@
+# generated with msfvenom -p windows/x64/exec CMD=calc.exe -f raw -o payload.bin
 with open("../shellcode/payload.bin", "rb") as f:
     shellcode = bytearray(f.read())
 
