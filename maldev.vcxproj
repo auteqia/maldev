@@ -25,7 +25,10 @@
     <ClCompile Include="01-Payload-placement\load-from-resource.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="02-Payload-Encryption\xor.c" />
+    <ClCompile Include="02-Payload-Encryption\lazy-SystemFunction032-rc4.c" />
+    <ClCompile Include="02-Payload-Encryption\xor.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
