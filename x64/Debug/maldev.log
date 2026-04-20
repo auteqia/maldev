@@ -1,2 +1,3 @@
-﻿  calc.exe-text-section-payload.cpp
+﻿  xor.c
+C:\Users\auteqia\source\repos\maldev\maldev\02-Payload-Encryption\xor.c(10,10): warning C4047: 'initializing': 'SIZE_T' differs in levels of indirection from 'void *'
   maldev.vcxproj -> C:\Users\auteqia\source\repos\maldev\x64\Debug\maldev.exe
