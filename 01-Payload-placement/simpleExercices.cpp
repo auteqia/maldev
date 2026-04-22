@@ -1,0 +1,79 @@
+#include <windows.h>
+#include <stdio.h>
+
+
+
+int main() {
+    // This is needed to store the handle to the file object
+    // the 'INVALID_HANDLE_VALUE' is just to intialize the variable
+    HANDLE hFile = INVALID_HANDLE_VALUE;
+
+    // The full path of the file to create.
+    // Double backslashes are required to escape the single backslash character in C
+    // Make sure the username (maldevacademy) exists, otherwise modify it
+    LPCWSTR filePath = L"C:\\Users\\auteqia\\Desktop\\maldev.txt";
+
+    // Call CreateFileW with the file path
+    // The additional parameters are directly from the documentation
+    hFile = CreateFileW(filePath, GENERIC_ALL, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+
+    // On failure CreateFileW returns INVALID_HANDLE_VALUE
+    // GetLastError() is another Windows API that retrieves the error code of the previously executed WinAPI function
+    if (hFile == INVALID_HANDLE_VALUE) {
+        printf("[-] CreateFileW Api Function Failed With Error : %d\n", GetLastError());
+        return -1;
+    }
+    printf("Handled returned: %p\n", hFile);
+
+
+    // On utilise un simple tableau de caractères (ANSI)
+    const char* dataPayload = "Maldev made with <3";
+
+    //longueur de la str
+    DWORD bytesToWrite = (DWORD)strlen(dataPayload);
+
+    //pointeur vers une variable pour nous dire combien d'octets il a reellement ecrit
+    DWORD bytesWritten;
+
+    BOOL writeResult = WriteFile(hFile, dataPayload, bytesToWrite, &bytesWritten, NULL);
+    if (writeResult == FALSE) {
+        printf("Code d'erreur : %d\n", GetLastError());
+    }
+    else {
+        printf("%lu octets ont ete ecrits dans le fichier.\n", bytesWritten);
+    }
+
+    CloseHandle(hFile);
+
+
+
+
+    // Run a process
+
+    //empty struct
+    PROCESS_INFORMATION pi = { 0 };
+	STARTUPINFO si = { 0 };
+
+    BOOL notepad = CreateProcessW(L"C:\\Windows\\System32\\notepad.exe", NULL, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi);  // &pi pour le retour des infos du processus créé
+
+    if (!notepad) {
+        printf("Failed to create process. Error code: %d\n", GetLastError());
+
+    }
+    else {
+        printf("Process created successfully.\n");
+    }
+
+
+
+
+    // Find username
+    char Username[256];
+    DWORD usernameSize = sizeof(Username);
+    if (GetUserNameA(Username, &usernameSize)) {
+        printf("Username: %s\n", Username);
+    }
+    else {
+        printf("Failed to get username. Error code: %d\n", GetLastError());
+    }
+}
