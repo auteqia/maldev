@@ -35,7 +35,10 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="03-DLL-as-payload\load-my-oh-my-dll.c" />
+    <ClCompile Include="03-DLL-as-payload\load-my-oh-my-dll.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="04-Shellcode-injection\CreateThread-execute-shellcode.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
