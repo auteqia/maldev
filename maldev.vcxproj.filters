@@ -39,6 +39,9 @@
     <ClCompile Include="04-Shellcode-injection\CreateThread-execute-shellcode.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="04-Shellcode-injection\inject-remote-dll.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">

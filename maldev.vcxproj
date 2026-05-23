@@ -40,6 +40,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="04-Shellcode-injection\CreateThread-execute-shellcode.c" />
+    <ClCompile Include="04-Shellcode-injection\inject-remote-dll.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
