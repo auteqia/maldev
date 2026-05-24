@@ -131,12 +131,13 @@ int wmain(int argc, wchar_t* argv[]) { // Utilisation de wchar_t
 	}
 
 
-	// inject the dll to the remote process using CreateRemoteThread
+	// inject the shellcode to the remote process using CreateRemoteThread
 	if (!InjectShellcodeToRemoteProcess(hProcess, shellcode ,sizeof(shellcode))) {
-		printf("DLL Injection failed.\n");
 		CloseHandle(hProcess);
 		return -1;
 	}
+
+	VirtualFreeEx(hProcess, NULL, 0, MEM_RELEASE);
 
 	printf("Done! Press <Enter> to quit");
 	getchar();
