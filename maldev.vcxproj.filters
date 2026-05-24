@@ -42,6 +42,9 @@
     <ClCompile Include="05-DLL-Injection\CreateRemoteThread-dll.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="04-Shellcode-injection\CreateRemoteThread-shellcode.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
