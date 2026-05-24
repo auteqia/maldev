@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="../../../../../../source/repos/maldev/maldev/03-DLL-as-payload/DLL-Payload/DLL-Payload/DLL-Payload.vcxproj" Id="907f4e65-12cc-4b53-a653-d6b1c1b652f3" />
+</Solution>
