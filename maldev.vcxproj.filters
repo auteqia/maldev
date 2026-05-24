@@ -48,6 +48,9 @@
     <ClCompile Include="04-Shellcode-injection\from-internet.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="06 - DNS-Staging-4-fun\dns-fetching.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
