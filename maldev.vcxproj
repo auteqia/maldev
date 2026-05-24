@@ -42,7 +42,10 @@
     <ClCompile Include="04-Shellcode-injection\CreateThread-execute-shellcode.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="04-Shellcode-injection\CreateRemoteThread-shellcode.c" />
+    <ClCompile Include="04-Shellcode-injection\CreateRemoteThread-shellcode.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="04-Shellcode-injection\from-internet.c" />
     <ClCompile Include="05-DLL-Injection\CreateRemoteThread-dll.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
