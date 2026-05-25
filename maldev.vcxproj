@@ -51,13 +51,10 @@
     <ClCompile Include="05-DLL-Injection\CreateRemoteThread-dll.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="06 - DNS-Staging-4-fun\dns-fetching.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="resource.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="Resource.rc" />
+    <ClCompile Include="Payload-Placement\dns-staging.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Shellcode-Injection\EnumProcesses-remote-injection.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="01-Payload-placement\resource\calc.bin" />

