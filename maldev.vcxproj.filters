@@ -36,22 +36,19 @@
     <ClCompile Include="03-DLL-as-payload\load-my-oh-my-dll.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="04-Shellcode-injection\CreateThread-execute-shellcode.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="05-DLL-Injection\CreateRemoteThread-dll.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="04-Shellcode-injection\CreateRemoteThread-shellcode.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="04-Shellcode-injection\from-internet.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="06 - DNS-Staging-4-fun\dns-fetching.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Payload-Placement\dns-staging.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Shellcode-Injection\EnumProcesses-remote-injection.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Thread-Hijacking\CreateThread-local-thread-hijacking.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Thread-Hijacking\remote-thread-hijacking.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Thread-Hijacking\Early-Bird-APC-Injection.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
